@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="#dddddd"
+    android:orientation="vertical" >
+
+    <TextView
+        android:id="@+id/locate_name"
+        android:layout_width="match_parent"
+        android:layout_height="52dp"
+        android:background="#aaaaaa"
+        android:gravity="center"
+        android:text="none"
+        android:textColor="#111111"
+        android:textSize="25sp" />
+
+    <ListView
+        android:id="@+id/tucao_list"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:background="#dddddd" >
+    </ListView>
+
+</LinearLayout>
