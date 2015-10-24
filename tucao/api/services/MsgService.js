@@ -1,15 +1,14 @@
-exports.XY_50M = 0.0001;
 
 module.exports = {
 
     list: function(x ,y, cb) {
         
-        var ty = y + XY_50M;
-        var by = y - XY_50M;
-        var lx = x - XY_50M;
-        var rx = x + XY_50M;
+        var ty = y + Constants.XY_50M;
+        var by = y - Constants.XY_50M;
+        var lx = x - Constants.XY_50M;
+        var rx = x + Constants.XY_50M;
 
-        console.log(x+","+y+","+XY_50M+","+lx+","+rx+","+by+","+ty);
+        console.log(x+","+y+","+Constants.XY_50M+","+lx+","+rx+","+by+","+ty);
         
         Msg.find().where({
             x: {
@@ -37,12 +36,12 @@ module.exports = {
 
     count: function(x, y, cb) {
         
-        var ty = y + XY_50M;
-        var by = y - XY_50M;
-        var lx = x - XY_50M;
-        var rx = x + XY_50M;
+        var ty = y + Constants.XY_50M;
+        var by = y - Constants.XY_50M;
+        var lx = x - Constants.XY_50M;
+        var rx = x + Constants.XY_50M;
 
-        console.log(x+","+y+","+XY_50M+","+lx+","+rx+","+by+","+ty);
+        console.log(x+","+y+","+Constants.XY_50M+","+lx+","+rx+","+by+","+ty);
     
         Msg.count({
             x: {

@@ -28,15 +28,15 @@ module.exports = {
         var x = Number(req.param("x") || 0.0);
         var y = Number(req.param("y") || 0.0);
 
-        var ty = y + MsgService.XY_50M;
-        var by = y - MsgService.XY_50M;
-        var lx = x - MsgService.XY_50M;
-        var rx = x + MsgService.XY_50M;
+        var ty = y + Constants.XY_50M;
+        var by = y - Constants.XY_50M;
+        var lx = x - Constants.XY_50M;
+        var rx = x + Constants.XY_50M;
 
-        console.log(x+","+y+","+MsgService.XY_50M+","+lx+","+rx+","+by+","+ty);
+        console.log(x+","+y+","+Constants.XY_50M+","+lx+","+rx+","+by+","+ty);
 
         var date = new Date();
-        var dateMid = date.getTime() - 1 * 60 * 1000; // 一分钟
+        var dateMid = date.getTime() - 2 *  60 * 1000; // 一分钟
         var dateBefore = new Date(dateMid);
 
         Msg.find().where({
@@ -64,8 +64,8 @@ module.exports = {
             var result = {};
             result.flag = true; result.contents= [];
             if (msgs && msgs.length >= 1) {
-                result.x = msgs[0].x;
-                result.y = msgs[0].y;
+                result.x = CommonService.reConvertCoordinate(msgs[0].x);
+                result.y = CommonService.reConvertCoordinate(msgs[0].y);
                 for (var i in msgs) {
                     result.contents.push(msgs[i].content);
                 }   
