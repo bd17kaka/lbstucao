@@ -6,8 +6,11 @@ import android.content.Intent;
 import android.graphics.Point;
 import android.os.Bundle;
 import android.os.Handler;
+import android.os.Looper;
+import android.os.Message;
 import android.os.SystemClock;
 import android.text.TextUtils;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.MotionEvent;
@@ -40,6 +43,10 @@ import com.amap.api.maps.model.LatLng;
 import com.amap.api.maps.model.LatLngBounds;
 import com.amap.api.maps.model.Marker;
 import com.amap.api.maps.model.MarkerOptions;
+import com.google.gson.Gson;
+import com.hacklm.assist.Count;
+import com.hacklm.assist.Detail;
+import com.hacklm.assist.NetUtils;
 
 public class MainActivity extends Activity implements OnMapClickListener,
 		OnMapLongClickListener, OnCameraChangeListener, OnMapTouchListener,
@@ -74,6 +81,7 @@ public class MainActivity extends Activity implements OnMapClickListener,
 	 * 初始化AMap对象
 	 */
 	private void init() {
+		Log.i("init", "initinit");
 		if (aMap == null) {
 			aMap = mapView.getMap();
 			setUpMap();
@@ -93,8 +101,9 @@ public class MainActivity extends Activity implements OnMapClickListener,
 				inputContent.setVisibility(View.GONE);
 				// TODO Auto-generated method stub
 				input.setFocusable(false);
-				InputMethodManager imm = (InputMethodManager) input.getContext()
-						.getSystemService(Context.INPUT_METHOD_SERVICE);
+				InputMethodManager imm = (InputMethodManager) input
+						.getContext().getSystemService(
+								Context.INPUT_METHOD_SERVICE);
 				imm.toggleSoftInput(0, InputMethodManager.HIDE_NOT_ALWAYS);
 			}
 		});
@@ -110,8 +119,9 @@ public class MainActivity extends Activity implements OnMapClickListener,
 					input.setText("");
 					inputContent.setVisibility(View.GONE);
 					input.setFocusable(false);
-					InputMethodManager imm = (InputMethodManager) input.getContext()
-							.getSystemService(Context.INPUT_METHOD_SERVICE);
+					InputMethodManager imm = (InputMethodManager) input
+							.getContext().getSystemService(
+									Context.INPUT_METHOD_SERVICE);
 					imm.toggleSoftInput(0, InputMethodManager.HIDE_NOT_ALWAYS);
 				} else {
 					Toast.makeText(MainActivity.this, "吐槽点什么吧",
@@ -120,13 +130,17 @@ public class MainActivity extends Activity implements OnMapClickListener,
 			}
 		});
 		this.marker = null;
+		addMarkersToMap(new LatLng(30.502326, 114.407022), "卧槽, 警察叔叔\n这里有HACK",
+				false);// 往地图上添加marker
 	}
 
 	protected void submitMarker(String title) {
 		// TODO Auto-generated method stub
 		this.marker.setTitle(title);
 		marker.showInfoWindow();
-		this.marker = null;
+		Log.e("thread create", "abc");
+		Thread t = new mAddThread();
+		t.start();
 		input.clearFocus();
 	}
 
@@ -135,10 +149,86 @@ public class MainActivity extends Activity implements OnMapClickListener,
 		if (this.marker != null) {
 			this.marker.destroy();
 			this.marker = null;
-			
+		}
+	}
+
+	public class mInitThread extends Thread {
+
+		@Override
+		public void run() {
+			// TODO Auto-generated method stub
+			// super.run();
+			String data = NetUtils.initWithOneMsg(30.502326, 114.407022);
+			Message msg = new Message();
+			msg.obj = data;
+			msg.what = 1;
+			myInitHandler.sendMessage(msg);
+			// Toast.makeText(getApplicationContext(), data, Toast.LENGTH_SHORT)
+			// .show();
+		}
+	}
+
+	public class mAddThread extends Thread {
+		@Override
+		public void run() {
+			// TODO Auto-generated method stu
+			Log.e("if", "abc");
+			if (MainActivity.this.marker != null) {
+				Marker m = MainActivity.this.marker;
+				NetUtils.addTucao(m.getPosition().latitude,
+						m.getPosition().longitude, m.getTitle());
+				MainActivity.this.marker = null;
+			}
+		}
+	}
+
+	public class mDetailThread extends Thread {
+
+		private double x, y;
+
+		public mDetailThread(double x, double y) {
+			this.x = x;
+			this.y = y;
 		}
 
+		@Override
+		public void run() {
+			// TODO Auto-generated method st
+			String s = NetUtils.getDetail(x, y);
+			Message msg = new Message();
+			msg.obj = s;
+			msg.what = 1;
+			myDetailHandler.sendMessage(msg);
+
+		}
 	}
+
+	final Handler myDetailHandler = new Handler() {
+		public void handleMessage(Message msg) {
+			if (msg.what == 1) {
+				// Gson gson = new Gson();
+				// Detail d = gson.fromJson(msg.obj.toString(), Detail.class);
+				Intent i = new Intent(MainActivity.this, DetailActivity.class);
+				i.putExtra("data", msg.obj.toString());
+				// Toast.makeText(MainActivity.this, d.getContents()[0],
+				// Toast.LENGTH_SHORT).show();
+				startActivity(i);
+			}
+		};
+	};
+
+	final Handler myInitHandler = new Handler() {
+		public void handleMessage(android.os.Message msg) {
+			if (msg.what == 1) {
+				Gson gson = new Gson();
+				Count count = gson.fromJson(msg.obj.toString(), Count.class);
+				for (com.hacklm.assist.Marker m : count.getData()) {
+					addMarkersToMap(new LatLng(m.getX(), m.getY()),
+							m.getExample() + "(" + m.getCount() + ")", false);
+				}
+			}
+		};
+	};
 
 	/**
 	 * amap添加一些事件监听器
@@ -156,7 +246,7 @@ public class MainActivity extends Activity implements OnMapClickListener,
 		aMap.setOnMarkerClickListener(this);// 设置点击marker事件监听器
 		aMap.setOnInfoWindowClickListener(this);// 设置点击infoWindow事件监听器
 		aMap.setInfoWindowAdapter(this);// 设置自定义InfoWindow样式
-		addMarkersToMap(new LatLng(30.502326, 114.407022), "卧槽", "警察这里有HACK");// 往地图上添加marker
+
 	}
 
 	/**
@@ -166,6 +256,9 @@ public class MainActivity extends Activity implements OnMapClickListener,
 	protected void onResume() {
 		super.onResume();
 		mapView.onResume();
+		aMap.clear();
+		Thread t = new mInitThread();
+		t.start();
 	}
 
 	/**
@@ -198,13 +291,12 @@ public class MainActivity extends Activity implements OnMapClickListener,
 	/**
 	 * 在地图上添加marker
 	 */
-	private Marker addMarkersToMap(LatLng point, String title, String snip) {
+	private Marker addMarkersToMap(LatLng point, String title, boolean draggable) {
 		Marker marker = aMap.addMarker(new MarkerOptions()
 				.title(title)
-				.snippet(snip)
 				.icon(BitmapDescriptorFactory
 						.defaultMarker(BitmapDescriptorFactory.HUE_AZURE))
-				.draggable(true));
+				.draggable(draggable));
 		marker.setPosition(point);
 		if (title != "")
 			marker.showInfoWindow();
@@ -268,8 +360,9 @@ public class MainActivity extends Activity implements OnMapClickListener,
 	public void onInfoWindowClick(Marker marker) {
 		Toast.makeText(this, "你点击了infoWindow窗口" + marker.getTitle(),
 				Toast.LENGTH_SHORT).show();
-		startActivity(new Intent(this.getApplicationContext(),
-				DetailActivity.class));
+		Thread t = new mDetailThread(marker.getPosition().latitude,
+				marker.getPosition().longitude);
+		t.start();
 
 		// ToastUtil.show(MarkerActivity.this, "当前地图可视区域内Marker数量:"
 		// + aMap.getMapScreenMarkers().size());
@@ -345,7 +438,7 @@ public class MainActivity extends Activity implements OnMapClickListener,
 		Toast.makeText(this, point.latitude + " " + point.longitude,
 				Toast.LENGTH_SHORT).show();
 		if (inputContent.getVisibility() == View.GONE) {
-			this.marker = addMarkersToMap(point, "", "");
+			this.marker = addMarkersToMap(point, "", true);
 			inputContent.setVisibility(View.VISIBLE);
 			input.requestFocus();
 			InputMethodManager imm = (InputMethodManager) input.getContext()
@@ -355,7 +448,6 @@ public class MainActivity extends Activity implements OnMapClickListener,
 		} else {
 			Toast.makeText(this, "莫慌", Toast.LENGTH_SHORT).show();
 		}
-
 	}
 
 	/**
@@ -381,6 +473,20 @@ public class MainActivity extends Activity implements OnMapClickListener,
 	@Override
 	public void onCameraChangeFinish(CameraPosition cameraPosition) {
 
+	}
+
+	@Override
+	public void onBackPressed() {
+		// TODO Auto-generated method stub
+		if (inputContent.getVisibility() != View.GONE) {
+			inputContent.setVisibility(View.GONE);
+			if(this.marker!=null){
+				this.marker.destroy();
+				this.marker = null;
+			}
+		}else{
+			super.onBackPressed();
+		}
 	}
 
 	/**
