@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="#cccccc"
+    android:orientation="vertical" >
+
+    <TextView
+        android:id="@+id/locate_name"
+        android:layout_width="match_parent"
+        android:layout_height="52dp"
+        android:background="#aaaaaa"
+        android:gravity="center"
+        android:text="这里的吐槽"
+        android:textColor="#111111"
+        android:textSize="25sp" />
+
+    <ListView
+        android:id="@+id/tucao_list"
+        android:layout_width="match_parent"
+        android:layout_height="368dp"
+        android:layout_alignParentBottom="true"
+        android:layout_alignParentLeft="true"
+        android:layout_below="@+id/locate_name"
+        android:layout_weight="0.88"
+        android:background="#cccccc" >
+
+    </ListView>
+
+    <Button
+        android:id="@+id/addTucao"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_alignParentBottom="true"
+        android:layout_alignParentLeft="true"
+        android:text="我也要吐槽" />
+
+    <EditText
+        android:id="@+id/input2"
+        android:layout_width="wrap_content"
+        android:layout_height="200dp"
+        android:layout_above="@+id/addTucao"
+        android:layout_alignParentLeft="true"
+        android:layout_alignParentRight="true"
+        android:ems="30"
+        android:padding="15dp"
+        android:visibility="gone"
+        android:textColor="#000000"
+        android:background="#ffffff"
+        android:inputType="text" >
+    </EditText>
+
+</RelativeLayout>
