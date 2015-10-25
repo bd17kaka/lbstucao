@@ -13,7 +13,7 @@ module.exports = {
         var y = Number(req.param("y") || 0.0);
         var content = req.param("content") || "test";
 
-        console.log(x+","+y+","+content);
+        console.log("add,x="+x+",y="+y+","+content);
 
         Msg.create({
             x: CommonService.convertCoordinate(x),
@@ -61,6 +61,7 @@ module.exports = {
         var y = Number(req.param("y") || 0.0);
 
         MsgService.listExactly(x, y, function(msgs) {
+            console.log(msgs);
             var result = {};
             result.flag = true; result.contents= [];
             if (msgs && msgs.length >= 1) {
